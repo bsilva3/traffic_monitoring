@@ -20,7 +20,9 @@ class RoadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Road
         fields =  '__all__'
+
+
 class RoadSpeedSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoadSpeed
-        fields = ['road_id', 'time', 'speed', 'intensity', 'caracterization']
+        fields = '__all__'
