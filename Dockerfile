@@ -1,4 +1,4 @@
-#FROM ubuntu:18.04
+FROM ubuntu:18.04
 FROM python:3.8.3-slim-buster
 
 ENV PYTHONUNBUFFERED 1
