@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import IsAuthenticated  # <-- Here
+from django.contrib.auth.decorators import permission_required
 import csv
 from io import StringIO
 from django.contrib.gis.geos import Point
@@ -45,11 +46,15 @@ class RoadDetail(APIView):
             raise Http404
 
     def get(self, request, id, format=None):
+        if not request.user.has_perm('traffic_monitoring.view_road'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         road = self.get_object(id)
         serializer = RoadSerializer(road)
         return Response(serializer.data)
-
+    #@permission_required('traffic_monitoring.change_road') 
     def patch(self, request, id, format=None):
+        if not request.user.has_perm('traffic_monitoring.change_road'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         road = self.get_object(id)
         serializer = RoadSerializer(road, data=request.data, partial=True)#we may not have all fields here (partial update of fields)
         if serializer.is_valid():
