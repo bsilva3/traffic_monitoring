@@ -6,7 +6,8 @@ from .serializers import RoadSerializer, RoadSpeedSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
+from rest_framework.parsers import FileUploadParser
+from rest_framework.permissions import IsAuthenticated  # <-- Here
 import csv
 from io import StringIO
 from django.contrib.gis.geos import Point
@@ -18,6 +19,7 @@ class RoadList(APIView):
     """
     List all road segments, or create a new road segment.
     """
+    permission_classes = (IsAuthenticated,) 
     def get(self, request, format=None):
         roads = Road.objects.all()
         serializer = RoadSerializer(roads, many=True)
@@ -35,6 +37,7 @@ class RoadDetail(APIView):
     """
     Retrieve, update or delete a road segment.
     """
+    permission_classes = (IsAuthenticated,) 
     def get_object(self, id):
         try:
             return Road.objects.get(id=id)
@@ -64,6 +67,7 @@ class RoadSpeedList(APIView):
     """
     List all road speed readings segments or create a new one
     """
+    permission_classes = (IsAuthenticated,)
     def get(self, request, format=None):
         road_speeds = RoadSpeed.objects.all()
         serializer = RoadSpeedSerializer(road_speeds, many=True)
@@ -80,6 +84,7 @@ class RoadSpeedSegmentList(APIView):
     """
     List all road speed readings for a given road segment
     """
+    permission_classes = (IsAuthenticated,)
     def get(self, request, road_id, format=None):
         try:
             road_speeds = RoadSpeed.objects.filter(road_id=road_id) #we may have multiple speed readings for a single road
@@ -93,6 +98,7 @@ class RoadSpeedSegmentDetail(APIView):
     """
     Retrieve, update or delete a specific road speed reading (for a given road and time).
     """
+    permission_classes = (IsAuthenticated,)
     def get_object(self, road_id, time):
         try:
             return RoadSpeed.objects.get(road_id=road_id, time=time)
@@ -120,7 +126,7 @@ class RoadSpeedSegmentDetail(APIView):
 
 class FileUploadView(APIView):
     parser_classes = (FileUploadParser,)
-
+    permission_classes = (IsAuthenticated,)
     def post(self, request, format=None):
         file = request.FILES['file'] 
         csvf = StringIO(file.read().decode())

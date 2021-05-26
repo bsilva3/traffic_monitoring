@@ -17,6 +17,8 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.urls import path
 from rest_framework import routers
+from rest_framework.authtoken import views
+
 
 
 router = routers.DefaultRouter()
@@ -26,5 +28,6 @@ urlpatterns = [
     path('api/v1/', include('traffic_monitoring.urls')), 
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    #url(r'^api/v1/', include((router.urls, 'api'), namespace='api')),
+    path('api-token-auth/', views.obtain_auth_token)
+    #path("o/", include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]

@@ -3,8 +3,18 @@ from django.contrib.gis.db import models
 from django.contrib.postgres.operations import CreateExtension
 from django.db import migrations
 from django.core.validators import MinValueValidator, MaxValueValidator
+from rest_framework.authtoken.models import Token
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.conf import settings
 
 # Create your models here.
+
+#create user tokens when created
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
 
 
 class Migration(migrations.Migration):
