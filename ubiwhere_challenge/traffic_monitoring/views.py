@@ -1,17 +1,19 @@
-from functools import partial
-from os import read
+import csv
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
 from .models import Road, RoadSpeed
 from django.http import Http404
-from .serializers import RoadSerializer, RoadSpeedSerializer
+from .serializers import RoadSerializer, RoadSpeedFilter, RoadSpeedSerializer, UserSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import FileUploadParser
-from rest_framework.permissions import IsAuthenticated  # <-- Here
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import permission_required
-import csv
 from io import StringIO
 from django.contrib.gis.geos import Point
+from django_filters import rest_framework as filters
+#from .filters import RoadSpeedFilter
 
 
 # Create your views here.
@@ -46,15 +48,16 @@ class RoadDetail(APIView):
             raise Http404
 
     def get(self, request, id, format=None):
-        if not request.user.has_perm('traffic_monitoring.view_road'):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        #if not request.user.has_perm('traffic_monitoring.view_road'):
+        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
         road = self.get_object(id)
         serializer = RoadSerializer(road)
         return Response(serializer.data)
+
     #@permission_required('traffic_monitoring.change_road') 
     def patch(self, request, id, format=None):
-        if not request.user.has_perm('traffic_monitoring.change_road'):
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        #if not request.user.has_perm('traffic_monitoring.change_road'):
+        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
         road = self.get_object(id)
         serializer = RoadSerializer(road, data=request.data, partial=True)#we may not have all fields here (partial update of fields)
         if serializer.is_valid():
@@ -74,10 +77,14 @@ class RoadSpeedList(APIView):
     """
     permission_classes = (IsAuthenticated,)
     def get(self, request, format=None):
+        #if not request.user.has_perm('traffic_monitoring.view_roadspeed'):
+        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
         road_speeds = RoadSpeed.objects.all()
         serializer = RoadSpeedSerializer(road_speeds, many=True)
         return Response(serializer.data)
     def post(self, request, format=None):
+        #if not request.user.has_perm('traffic_monitoring.change_roadspeed'):
+        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = RoadSpeedSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -91,6 +98,8 @@ class RoadSpeedSegmentList(APIView):
     """
     permission_classes = (IsAuthenticated,)
     def get(self, request, road_id, format=None):
+        #if not request.user.has_perm('traffic_monitoring.view_roadspeed'):
+        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
         try:
             road_speeds = RoadSpeed.objects.filter(road_id=road_id) #we may have multiple speed readings for a single road
         except RoadSpeed.DoesNotExist:
@@ -111,11 +120,15 @@ class RoadSpeedSegmentDetail(APIView):
             raise Http404
 
     def get(self, request, road_id, time, format=None):
+        #if not request.user.has_perm('traffic_monitoring.view_roadspeed'):
+        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
         road_speed = self.get_object(road_id, time)
         serializer = RoadSpeedSerializer(road_speed)
         return Response(serializer.data)
 
     def patch(self, request, road_id, time, format=None):
+        #if not request.user.has_perm('traffic_monitoring.change_roadspeed'):
+        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
         road_speed = self.get_object(road_id, time)
         serializer = RoadSpeedSerializer(road_speed, data=request.data,partial=True) #we may not have all fields here (partial update of fields)
         if serializer.is_valid():
@@ -128,10 +141,37 @@ class RoadSpeedSegmentDetail(APIView):
         road_speed.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class RoadSegmentList(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    #def get(self, request):
+    #first get latest inserted caracterization
+    #road_speed = RoadSpeed.objects.latest('time')
+    #print(road_speed)
+    queryset = RoadSpeed.objects.all()
+    serializer_class = RoadSpeedSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('caracterization')
+    filterset_class = RoadSpeedFilter
+
+class UserCreateAPIView(generics.CreateAPIView):
+    '''
+    Create a new user and assign a group to it (username, pass and user group id)
+    '''
+    permission_classes = (AllowAny,) #allow anonymous users to create users
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class FileUploadView(APIView):
+    '''
+    Upload a csv file containing the following columns: ID,Long_start,Lat_start,Long_end,Lat_end,Length,Speed.
+    These will load the database with data regarding road segments and road speed readings
+    '''
     parser_classes = (FileUploadParser,)
-    permission_classes = (IsAuthenticated,)
     def post(self, request, format=None):
         file = request.FILES['file'] 
         csvf = StringIO(file.read().decode())

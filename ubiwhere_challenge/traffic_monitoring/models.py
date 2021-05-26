@@ -1,3 +1,4 @@
+import logging
 from django.contrib.gis.db import models
 from django.contrib.postgres.operations import CreateExtension
 from django.db import migrations
@@ -6,26 +7,62 @@ from rest_framework.authtoken.models import Token
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+#from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.management import create_permissions
+from django.core.management import call_command
 
+def update_permissions(schema, group):
+    call_command('update_permissions')
+
+def add_group_permissions(apps, schema_editor):
+    logger = logging.getLogger(__name__)
+
+    for app_config in apps.get_app_configs():
+        create_permissions(app_config, apps=apps, verbosity=0)
+
+    Group = apps.get_model("auth","Group")
+    Permission = apps.get_model("auth","Permission")
+
+    # create groups on migrate (but does not work, need to be created manually)
+    group, created = Group.objects.get_or_create(name='administrator')
+    if created:
+        permissions_qs = Permission.objects.filter(
+            codename__in=['traffic_monitoring.add_road',
+                         'traffic_monitoring.change_road',
+                         'traffic_monitoring.delete_road',
+                         'traffic_monitoring.view_road',
+                         'traffic_monitoring.view_roadspeed',
+                         'traffic_monitoring.add_roadspeed',
+                         'traffic_monitoring.change_roadspeed',
+                         'traffic_monitoring.delete_roadspeed',]
+        )
+        group.permissions = permissions_qs
+        group.save()
+        logger.info('Group Admin Created')
+
+    # create visitor group
+    group, created = Group.objects.get_or_create(name='visitor')
+    if created:
+        permissions_qs = Permission.objects.filter(
+            codename__in=['traffic_monitoring.view_road', 'traffic_monitoring.view_roadspeed',]
+        )
+        group.permissions = permissions_qs
+        group.save()
+        logger.info('Group Visitor Created')
 
 # Create your models here.
 
 class Migration(migrations.Migration):
 
-    operations = [
-        CreateExtension('postgis'),
+    dependencies = [
+        ('traffic_monitoring', '0001_initial'),
     ]
 
-#class User(AbstractUser):
-#      ADMIN = 1
-#      VISITOR = 2
-      
-#      ROLE_CHOICES = (
-#          (ADMIN, 'admin'),
-#          (VISITOR, 'visitor'),
-#      )
-#      role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, blank=True, null=True)
+    operations = [
+        CreateExtension('postgis'),
+        migrations.RunPython(update_permissions, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(add_group_permissions),
+    ]
 
 #represents a road segment. Coordinates of the beginning and ending of street are represented using 2 PointFields
 class Road(models.Model):
@@ -66,4 +103,4 @@ class RoadSpeed(models.Model):
         super(RoadSpeed, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.road_id + ":\n time - " + self.time +", speed - "+ self.speed +", intensity - " + self.intensity + ", caracterization" + self.caracterization
+        return "{0}:\n time - {1}, speed - {2}, intensity - {3}, caracterization".format(self.road_id, self.time, self.speed, self.intensity, self.caracterization)
