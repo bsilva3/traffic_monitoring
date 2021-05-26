@@ -24,11 +24,15 @@ class RoadList(APIView):
     """
     permission_classes = (IsAuthenticated,) 
     def get(self, request, format=None):
+        if not request.user.has_perm('traffic_monitoring.view_road'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         roads = Road.objects.all()
         serializer = RoadSerializer(roads, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
+        if not request.user.has_perm('traffic_monitoring.add_road'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = RoadSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -48,16 +52,16 @@ class RoadDetail(APIView):
             raise Http404
 
     def get(self, request, id, format=None):
-        #if not request.user.has_perm('traffic_monitoring.view_road'):
-        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.has_perm('traffic_monitoring.view_road'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         road = self.get_object(id)
         serializer = RoadSerializer(road)
         return Response(serializer.data)
 
     #@permission_required('traffic_monitoring.change_road') 
     def patch(self, request, id, format=None):
-        #if not request.user.has_perm('traffic_monitoring.change_road'):
-        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.has_perm('traffic_monitoring.change_road'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         road = self.get_object(id)
         serializer = RoadSerializer(road, data=request.data, partial=True)#we may not have all fields here (partial update of fields)
         if serializer.is_valid():
@@ -66,6 +70,8 @@ class RoadDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id, format=None):
+        if not request.user.has_perm('traffic_monitoring.delete_road'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         road = self.get_object(id)
         road.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -77,14 +83,14 @@ class RoadSpeedList(APIView):
     """
     permission_classes = (IsAuthenticated,)
     def get(self, request, format=None):
-        #if not request.user.has_perm('traffic_monitoring.view_roadspeed'):
-        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.has_perm('traffic_monitoring.view_roadspeed'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         road_speeds = RoadSpeed.objects.all()
         serializer = RoadSpeedSerializer(road_speeds, many=True)
         return Response(serializer.data)
     def post(self, request, format=None):
-        #if not request.user.has_perm('traffic_monitoring.change_roadspeed'):
-        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.has_perm('traffic_monitoring.change_roadspeed'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = RoadSpeedSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -98,8 +104,8 @@ class RoadSpeedSegmentList(APIView):
     """
     permission_classes = (IsAuthenticated,)
     def get(self, request, road_id, format=None):
-        #if not request.user.has_perm('traffic_monitoring.view_roadspeed'):
-        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.has_perm('traffic_monitoring.view_roadspeed'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         try:
             road_speeds = RoadSpeed.objects.filter(road_id=road_id) #we may have multiple speed readings for a single road
         except RoadSpeed.DoesNotExist:
@@ -120,15 +126,15 @@ class RoadSpeedSegmentDetail(APIView):
             raise Http404
 
     def get(self, request, road_id, time, format=None):
-        #if not request.user.has_perm('traffic_monitoring.view_roadspeed'):
-        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.has_perm('traffic_monitoring.view_roadspeed'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         road_speed = self.get_object(road_id, time)
         serializer = RoadSpeedSerializer(road_speed)
         return Response(serializer.data)
 
     def patch(self, request, road_id, time, format=None):
-        #if not request.user.has_perm('traffic_monitoring.change_roadspeed'):
-        #    return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.has_perm('traffic_monitoring.change_roadspeed'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         road_speed = self.get_object(road_id, time)
         serializer = RoadSpeedSerializer(road_speed, data=request.data,partial=True) #we may not have all fields here (partial update of fields)
         if serializer.is_valid():
@@ -137,11 +143,13 @@ class RoadSpeedSegmentDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, road_id, time, format=None):
+        if not request.user.has_perm('traffic_monitoring.delete_roadspeed'):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         road_speed = self.get_object(road_id, time)
         road_speed.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-'''class RoadSegmentList(generics.ListAPIView):
+class RoadSegmentList(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     #def get(self, request):
     #first get latest inserted caracterization
@@ -151,7 +159,7 @@ class RoadSpeedSegmentDetail(APIView):
     serializer_class = RoadSpeedSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = ('caracterization')
-    filterset_class = RoadSpeedFilter'''
+    filterset_class = RoadSpeedFilter
 
 class UserCreateAPIView(generics.CreateAPIView):
     '''
