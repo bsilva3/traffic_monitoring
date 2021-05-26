@@ -2,7 +2,6 @@ asgiref==3.3.4
 certifi==2020.12.5
 cffi==1.14.5
 chardet==4.0.0
-cryptography==3.4.7
 Django==3.2.3
 django-cors-middleware==1.5.0
 django-filter==2.4.0
@@ -11,7 +10,6 @@ djangorestframework-gis==0.17
 idna==2.10
 jwcrypto==0.8
 oauthlib==3.1.0
-psycopg2==2.8.6
 psycopg2-binary==2.8.6
 pycparser==2.20
 pytz==2021.1

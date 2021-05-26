@@ -141,7 +141,7 @@ class RoadSpeedSegmentDetail(APIView):
         road_speed.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class RoadSegmentList(generics.ListAPIView):
+'''class RoadSegmentList(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     #def get(self, request):
     #first get latest inserted caracterization
@@ -151,7 +151,7 @@ class RoadSegmentList(generics.ListAPIView):
     serializer_class = RoadSpeedSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = ('caracterization')
-    filterset_class = RoadSpeedFilter
+    filterset_class = RoadSpeedFilter'''
 
 class UserCreateAPIView(generics.CreateAPIView):
     '''

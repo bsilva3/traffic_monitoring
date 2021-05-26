@@ -98,7 +98,7 @@ DATABASES = {
         'NAME': 'gis',
         'USER': 'ubi',
         'PASSWORD': 'pass1234',
-        'HOST': 'localhost',
+        'HOST': 'database',
         'PORT': '5432'
     }
 }
