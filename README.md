@@ -5,20 +5,27 @@ Download and install [Docker](https://docs.docker.com/get-docker/).
 Navigate to the root directory of this project and run
 
     sudo docker-compose run --rm app django-admin startproject app
+    
+or:
+
+    docker-compose up --build
 
 Execute the project using:
 
     sudo docker-compose up
 The previous command should create a postgresql database with postgis using a docker image and the django project in another container. Migrations and 'run server' are automatically executed on the django project.  
 
-If for any reason you need to execute certain commands within the container, such as creating a super user, run:
+You may need to create a super user to access the django admin panel. To do so run:
 
     sudo docker exec -it <django container id> python manage.py makemigrations
+To get the id of the container use the following command and look for a container named "ubiwhere_traffic_monitoring_app":
+
+    sudo docker container ls
     
 
 ## Documentation
 - [Swagger](https://app.swaggerhub.com/apis/bsilva3/ubiwhere_traffic_monitoring/1.0.0)
-- Postman - where it is possible to run the project directly with examples already available (this collection should have a variable 'token' that automatically updates itself when a token is requested, thus updating the token for any request that is made within postman)
+- Postman AAAAAAAAAA - where it is possible to run the project directly with examples already available (this collection should have a variable 'token' that automatically updates itself when a token is requested, thus updating the token for any request that is made within postman)
 
 
 ## Setting up
