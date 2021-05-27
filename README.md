@@ -37,7 +37,7 @@ Next step should be to create users using the 'register user enpoint', as seen i
 
 Finally, to load the database with data use the endpoint 'upload traffic dataset' in postman. Use the [provided csv file](https://github.com/Ubiwhere/traffic_speed/blob/master/traffic_speed.csv) and upload it in postman in the header, field "Content-Disposition', and select the csv file as input. The database will be loaded with the data in that csv
 
-## Implementation
+# Implementation
 
 ## Database and models
 A PosgtreSQL database with postgis is used to save information using [this docker image](https://hub.docker.com/r/kartoza/postgis/).
