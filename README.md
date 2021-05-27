@@ -1,7 +1,7 @@
 # traffic_monitoring
 
 ## Installation
-Download and install [Docker] (https://docs.docker.com/get-docker/).  
+Download and install [Docker](https://docs.docker.com/get-docker/).  
 Navigate to the root directory of this project and run
 
     sudo docker-compose run --rm app django-admin startproject app
@@ -17,9 +17,10 @@ If for any reason you need to execute certain commands within the container, suc
     
 
 ## Documentation
-- [Swagger] (https://app.swaggerhub.com/apis/bsilva3/ubiwhere_traffic_monitoring/1.0.0)
+- [Swagger](https://app.swaggerhub.com/apis/bsilva3/ubiwhere_traffic_monitoring/1.0.0)
 - Postman - where it is possible to run the project directly with examples already available (this collection should have a variable 'token' that automatically updates itself when a token is requested, thus updating the token for any request that is made within postman)
-- 
+
+
 ## Setting up
 If the database is empty, groups need to be added manually using Django's administrator platform. Navigate to 'admin/', select "Group" on the left and add two users in the following order:
 - First, a group named 'administrator' with permitions to add, remove, change and view roads and road speeds.
