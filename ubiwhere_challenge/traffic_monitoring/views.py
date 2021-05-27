@@ -3,7 +3,7 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from .models import Road, RoadSpeed
 from django.http import Http404
-from .serializers import RoadSerializer, RoadSpeedFilter, RoadSpeedSerializer, UserSerializer
+from .serializers import RoadSerializer, RoadFilter, RoadSpeedSerializer, UserSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,7 +13,6 @@ from django.contrib.auth.decorators import permission_required
 from io import StringIO
 from django.contrib.gis.geos import Point
 from django_filters import rest_framework as filters
-#from .filters import RoadSpeedFilter
 
 
 # Create your views here.
@@ -151,15 +150,22 @@ class RoadSpeedSegmentDetail(APIView):
 
 class RoadSegmentList(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
-    #def get(self, request):
+
+    #simply get all roads and filter them
+    queryset = Road.objects.all()
+    serializer_class = RoadSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('id', 'speed')
+    filterset_class = RoadFilter
+
+    ## Initially trying to get roads whose last reading was the same as the last speed reading registered and filter on those roads
     #first get latest inserted caracterization
     #road_speed = RoadSpeed.objects.latest('time')
     #print(road_speed)
-    queryset = RoadSpeed.objects.all()
-    serializer_class = RoadSpeedSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ('caracterization')
-    filterset_class = RoadSpeedFilter
+    #road_speed_set = RoadSpeed.objects.filter(caracterization=road_speed.caracterization).values_list('road_id') #get list of roads 
+    #print(road_speed_set)
+    #queryset = Road.objects.filter(id__in=road_speed_set)
+
 
 class UserCreateAPIView(generics.CreateAPIView):
     '''
@@ -194,10 +200,9 @@ class FileUploadView(APIView):
                 roads_speed.append(RoadSpeed(road_id=road, speed=float(r[6])))
 
         Road.objects.bulk_create(roads, len(roads))
+
         #RoadSpeed.objects.bulk_create(roads_speed, len(roads_speed))
-        # we cannot use bulk create on RoadSpeed because it does not call save(), which is necessary
+        # we cannot use bulk create on RoadSpeed because it does not call save(), which is necessary to create the intensisty, time stamp and caracterization
         for rs in roads_speed:
             rs.save()
-        
-
         return Response(status=204)

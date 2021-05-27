@@ -41,14 +41,14 @@ def add_group_permissions(apps, schema_editor):
         logger.info('Group Admin Created')
 
     # create visitor group
-    group, created = Group.objects.get_or_create(name='visitor')
+    group, created = Group.objects.get_or_create(name='administrator')
     if created:
         permissions_qs = Permission.objects.filter(
             codename__in=['traffic_monitoring.view_road', 'traffic_monitoring.view_roadspeed',]
         )
         group.permissions = permissions_qs
         group.save()
-        logger.info('Group Visitor Created')
+        logger.info('Group visitor Created')
 
 # Create your models here.
 
@@ -60,8 +60,8 @@ class Migration(migrations.Migration):
 
     operations = [
         CreateExtension('postgis'),
-        migrations.RunPython(update_permissions, reverse_code=migrations.RunPython.noop),
-        migrations.RunPython(add_group_permissions),
+        #migrations.RunPython(update_permissions, reverse_code=migrations.RunPython.noop),#supposed to create groups, but does not work
+        #migrations.RunPython(add_group_permissions),
     ]
 
 #represents a road segment. Coordinates of the beginning and ending of street are represented using 2 PointFields

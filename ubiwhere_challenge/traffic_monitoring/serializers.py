@@ -33,11 +33,14 @@ class RoadSpeedSerializer(serializers.ModelSerializer):
         model = RoadSpeed
         fields = '__all__'
 
-
-class RoadSpeedFilter(filters.FilterSet):
+# create filters for road segments
+class RoadFilter(filters.FilterSet):
 
         class Meta:
-            model = RoadSpeed
+            model = Road
             fields = {
-                'caracterization' : ['exact'] #create a filter for speed readings based on the caracterization field
+                'id' : ['exact'],
+                #'coord_start' : ['exact'],
+                #'coord_end' : ['exact'],
+                'length' : ['exact', 'lt', 'gt']
             }
