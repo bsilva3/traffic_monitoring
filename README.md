@@ -25,7 +25,7 @@ To get the id of the container use the following command and look for a containe
 
 ## Documentation
 - [Swagger](https://app.swaggerhub.com/apis/bsilva3/ubiwhere_traffic_monitoring/1.0.0)
-- [Postman](https://www.getpostman.com/collections/f2ee38d58cd868bd17cd) - where it is possible to run the project directly with examples already available (this collection should have a variable 'token' that automatically updates itself when a token is requested, thus updating the token for any request that is made within postman)
+- [Postman](https://www.postman.com/blue-firefly-2073/workspace/ubi-challenge-traffic-monitoring/overview) - where it is possible to run the project directly with examples already available (this collection should have a variable 'token' that automatically updates itself when a token is requested, thus updating the token for any request that is made within postman)
 
 
 ## Setting up
