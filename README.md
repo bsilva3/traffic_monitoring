@@ -2,18 +2,16 @@
 
 ## Installation
 Download and install [Docker](https://docs.docker.com/get-docker/).  
-Navigate to the root directory of this project and run
-
-    sudo docker-compose run --rm app django-admin startproject app
-    
-To build and run the project:
+Navigate to the root directory of this project and execute the command to build and run:
 
     docker-compose up --build
-
-To simply run:
+   
+The previous command should create a postgresql database with postgis using a docker image and the django project in another container. Migrations and 'run server' are automatically executed on the django project.  
+    
+To simply run the project:
 
     sudo docker-compose up
-The previous command should create a postgresql database with postgis using a docker image and the django project in another container. Migrations and 'run server' are automatically executed on the django project.  
+
 
 You may need to create a super user to access the django admin panel. To do so run:
 
